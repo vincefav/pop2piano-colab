@@ -80,24 +80,54 @@ def download_youtube_audio_and_title(youtube_url, output_path):
     """
     Downloads audio from a YouTube URL and returns the video title.
     """
-    # Get the title
+    # Check if yt-dlp is available
+    if not shutil.which("yt-dlp"):
+        print("❌ yt-dlp not found. Installing...")
+        try:
+            subprocess.run([sys.executable, "-m", "pip", "install", "yt-dlp"], check=True)
+            print("✅ yt-dlp installed successfully")
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"Failed to install yt-dlp: {e}")
+    
+    # Get the title with better error handling
     title_command = [
         "yt-dlp",
         "--get-title",
+        "--no-warnings",
         youtube_url
     ]
-    title_result = subprocess.run(title_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
-    title = title_result.stdout.strip()
+    
+    try:
+        print(f"🔄 Getting video title for: {youtube_url}")
+        title_result = subprocess.run(title_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
+        title = title_result.stdout.strip()
+        print(f"✅ Video title: {title}")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Failed to get video title. Error: {e.stderr}")
+        print(f"yt-dlp command: {' '.join(title_command)}")
+        # Fallback to a generic title
+        title = "youtube_video"
+        print(f"🔄 Using fallback title: {title}")
 
-    # Download the audio
+    # Download the audio with better error handling
     download_command = [
         "yt-dlp",
         "-x",  # Extract audio
         "--audio-format", "wav",
+        "--no-warnings",
+        "--no-playlist",
         "-o", output_path,
         youtube_url
     ]
-    subprocess.run(download_command, check=True)
+    
+    try:
+        print(f"🔄 Downloading audio...")
+        subprocess.run(download_command, check=True, capture_output=True)
+        print("✅ Audio downloaded successfully")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Failed to download audio. Error: {e.stderr.decode() if e.stderr else 'Unknown error'}")
+        print(f"yt-dlp command: {' '.join(download_command)}")
+        raise RuntimeError(f"Failed to download audio from YouTube: {e}")
     
     return title
 
