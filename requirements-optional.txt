@@ -1,0 +1,9 @@
+# Optional dependencies for enhanced functionality
+# Install with: pip install -r requirements-optional.txt
+
+# Essentia for better rhythm extraction (challenging to install on Windows)
+essentia==2.1b5
+
+# Alternative installation methods for essentia:
+# conda install -c conda-forge essentia  (recommended for Windows)
+# or use WSL/Docker for easier installation 
