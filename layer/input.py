@@ -18,7 +18,7 @@ class LogMelSpectrogram(nn.Module):
         # x : audio(batch, sample)
         # X : melspec (batch, freq, frame)
         with torch.no_grad():
-            with torch.cuda.amp.autocast(enabled=False):
+            with torch.amp.autocast('cuda', enabled=False):
                 X = self.melspectrogram(x)
                 X = X.clamp(min=1e-6).log()
 
