@@ -19,6 +19,27 @@ import shutil
 import argparse
 import urllib.request
 
+# -----------------------------------------------------------------------------
+# Compatibility shim for Python 3.13+
+# -----------------------------------------------------------------------------
+# Some third-party libraries (e.g. ``antlr4`` used by ``omegaconf``) still
+# perform imports such as ``from typing.io import TextIO`` which were removed
+# from the standard ``typing`` module in Python ≥3.13.  If we are running on a
+# newer interpreter, we lazily create a fake ``typing.io`` sub-module that
+# exposes the required names so those stale imports continue to work.
+#
+# The shim is small, self-contained and adds **zero** runtime overhead for
+# environments where the sub-module already exists (≤3.12).
+# -----------------------------------------------------------------------------
+import types
+import typing
+
+if "typing.io" not in sys.modules:
+    io_mod = types.ModuleType("typing.io")
+    # Newer versions expose ``TextIO`` directly from ``typing`` so we map it.
+    io_mod.TextIO = typing.TextIO  # type: ignore[attr-defined]
+    sys.modules["typing.io"] = io_mod
+
 import torch
 import torchaudio
 import librosa
