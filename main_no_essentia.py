@@ -225,11 +225,39 @@ def main(args):
             continue
 
     zip_file_name = f"{safe_video_title}.zip"
+    zip_file_path = os.path.abspath(zip_file_name)
     print(f"Creating ZIP file: {zip_file_name}")
+    print(f"Full path: {zip_file_path}")
+    
+    midi_files_created = []
     with zipfile.ZipFile(zip_file_name, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for root, _, files_ in os.walk(temp_midi_dir):
             for file in files_:
-                zipf.write(os.path.join(root, file), file)
+                file_path = os.path.join(root, file)
+                zipf.write(file_path, file)
+                midi_files_created.append(file)
+    
+    if midi_files_created:
+        print(f"✅ ZIP file created successfully!")
+        print(f"📁 Location: {zip_file_path}")
+        print(f"📝 Contains {len(midi_files_created)} MIDI files:")
+        for midi_file in sorted(midi_files_created):
+            print(f"   - {midi_file}")
+        
+        # Check if we're in Colab and provide download instructions
+        try:
+            import google.colab
+            print(f"\n💡 To download in Colab:")
+            print(f"   - Look in the file browser (📁) on the left")
+            print(f"   - Or run: files.download('{zip_file_name}')")
+            print(f"   - File size: {os.path.getsize(zip_file_name)} bytes")
+        except ImportError:
+            print(f"\n💡 ZIP file is ready at: {zip_file_path}")
+    else:
+        print("❌ No MIDI files were generated - ZIP file will be empty")
+        if os.path.exists(zip_file_name):
+            os.remove(zip_file_name)
+            print("🗑️ Removed empty ZIP file")
     
     print("Cleaning up temporary files...")
     shutil.rmtree(temp_midi_dir)
