@@ -8,8 +8,8 @@ torch>=2.0.0
 torchaudio>=2.0.0
 # The "numpy<2" constraint was removed as it prevents installation on Python 3.13+.
 # To ensure compatibility, install numpy>=2 first, then install the rest of the packages.
-numpy
-yt-dlp
+numpy>=2
+yt-dlp>=2024.03.01
 librosa
 soundfile
 numba
